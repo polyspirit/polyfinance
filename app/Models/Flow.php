@@ -10,7 +10,7 @@ class Flow extends Model
 {
     protected $guarded = ['id'];
     protected $hidden = ['created_at', 'updated_at'];
-    protected $casts = ['income' => 'boolean'];
+    protected $casts = ['is_income' => 'boolean'];
 
 
     // RELATIONS

@@ -27,9 +27,23 @@ class FlowController extends Controller
 
     public function index(): \Illuminate\Http\JsonResponse
     {
-        return response()->json([
-			'status' => 'success',
-			'data' => $this->flowRepo->getAll()
-		], 200);
+        return $this->success($this->flowRepo->getAll());
+    }
+
+    public function store(Request $request)
+    {
+        if (!$this->validate(
+            [
+                'item' => 'required|string',
+                'amount' => 'required|numeric',
+                'is_income' => 'required|numeric'
+            ]
+        )) {
+            return $this->error();
+        }
+
+        $income = $this->flowRepo->create($request->all());
+
+        return $this->success(['id' => $income->id]);
     }
 }

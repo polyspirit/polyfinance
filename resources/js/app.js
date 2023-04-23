@@ -17,8 +17,8 @@ import { createApp } from 'vue';
 
 const app = createApp({});
 
-import Incomes from './components/Incomes.vue';
-app.component('Incomes', Incomes);
+// import Incomes from './components/Incomes.vue';
+// app.component('Incomes', Incomes);
 
 /**
  * The following block of code may be used to automatically register your
@@ -28,9 +28,9 @@ app.component('Incomes', Incomes);
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
 
-// Object.entries(import.meta.glob('./**/*.vue', { eager: true })).forEach(([path, definition]) => {
-//     app.component(path.split('/').pop().replace(/\.\w+$/, ''), definition.default);
-// });
+Object.entries(import.meta.glob('./**/*.vue', { eager: true })).forEach(([path, definition]) => {
+    app.component(path.split('/').pop().replace(/\.\w+$/, ''), definition.default);
+});
 
 /**
  * Finally, we will attach the application instance to a HTML element with

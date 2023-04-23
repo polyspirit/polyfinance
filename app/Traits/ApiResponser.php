@@ -24,7 +24,7 @@ trait ApiResponser
 	/**
      * Return a success JSON response.
      */
-	protected function success(mixed $data, ?string $message = null, int $code = 200)
+	protected function success(mixed $data, ?string $message = null, int $code = 200): \Illuminate\Http\JsonResponse
 	{
         $response = responseSuccess($data, $message, $code);
 

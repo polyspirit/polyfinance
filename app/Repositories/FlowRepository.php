@@ -19,7 +19,7 @@ class FlowRepository implements FlowRepositoryInterface
 
     public function create(array $details)
     {
-
+        Flow::create($details);
     }
     public function updateOrder(int $modelId, array $details)
     {
