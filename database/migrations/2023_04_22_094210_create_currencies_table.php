@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
             $table->string('code', 3);
-            $table->string('symbol', 15);
-            $table->double('rate', 12, 2, true);
+            $table->string('symbol', 15)->nullable();
+            $table->double('rate', 14, 4, true);
             $table->timestamps();
 
             $table->index('code');

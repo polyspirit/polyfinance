@@ -35,6 +35,14 @@ class MainRepository implements RepositoryInterface
         return $this->model::select($columns)->where($field, $value)->first();
     }
 
+    public function findOrCreate(string $field, mixed $value, array $data): \Illuminate\Database\Eloquent\Model
+    {
+        return $this->model::firstOrCreate(
+            [$field => $value],
+            $data
+        );
+    }
+
     public function getWhere(string $field, mixed $value, array $columns = ['*']): \Illuminate\Database\Eloquent\Collection
     {
         return $this->model::select($columns)->where($field, $value)->get();

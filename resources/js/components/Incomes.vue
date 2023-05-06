@@ -11,19 +11,23 @@
 
         <div class="mb-3" v-for="user in users" :key="user.id">
             <h2>{{ user.name }}</h2>
-            <table class="table table-striped-columns">
-                <tr>
-                    <th>Date: </th>
-                    <th>Item: </th>
-                    <th>Amount: </th>
-                    <th>Comment: </th>
-                </tr>
-                <tr v-for="flow in user.flows" :key="flow.id">
-                    <td>{{ flow.date }}</td>
-                    <td>{{ flow.item }}</td>
-                    <td>{{ flow.amount }} {{ flow.currency.symbol }}</td>
-                    <td>{{ flow.comment }}</td>
-                </tr>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Date: </th>
+                        <th>Item: </th>
+                        <th>Amount: </th>
+                        <th>Comment: </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="flow in user.flows" :key="flow.id">
+                        <td>{{ flow.date }}</td>
+                        <td>{{ flow.item }}</td>
+                        <td>{{ flow.amount }} {{ flow.currency.symbol || flow.currency.code }}</td>
+                        <td>{{ flow.comment }}</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -56,7 +60,7 @@
                                 <field-textarea name="comment"></field-textarea>
                             </div>
                         </div>
-                        <field-hidden name="is_income" value="1"></field-hidden>
+                        <field-hidden name="type" value="income"></field-hidden>
                     </form>
 
                 </div>
@@ -93,7 +97,6 @@ export default {
                 .get('/api/incomes')
                 .then((response) => {
                     this.users = response.data.data.users;
-                    // console.log(this.users);
                     for (const currency of response.data.data.currencies) {
                         this.currencies.push({
                             value: currency.id,

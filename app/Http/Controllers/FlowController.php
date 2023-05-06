@@ -29,29 +29,30 @@ class FlowController extends Controller
 
     public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $isIncome = $request->is_income ?? true;
-
         return $this->success([
             'users' => $this->userRepo->all(),
-            'flows' => $this->flowRepo->getWhere('is_income', $isIncome),
+            'flows' => $this->flowRepo->getWhere('type', $request->type),
             'currencies' => $this->currencyRepo->all()
         ]);
     }
 
     public function getIncomes(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (!isset($request->is_income) || !$request->is_income) {
-            $request->merge(['is_income' => true]);
-        }
+        $request->merge(['type' => 'income']);
 
         return $this->index($request);
     }
 
     public function getExpenses(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (!isset($request->is_income) || $request->is_income) {
-            $request->merge(['is_income' => false]);
-        }
+        $request->merge(['type' => 'expense']);
+
+        return $this->index($request);
+    }
+
+    public function getSpendings(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->merge(['type' => 'spending']);
 
         return $this->index($request);
     }
@@ -63,7 +64,7 @@ class FlowController extends Controller
                 'currency_id' => 'required|numeric',
                 'item' => 'required|string',
                 'amount' => 'required|numeric',
-                'is_income' => 'required|numeric',
+                'type' => 'string',
             ]
         )) {
             return $this->error();

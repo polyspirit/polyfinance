@@ -37,14 +37,21 @@ class User extends Authenticatable
     public function getIncomesAttribute(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->relateFlows->filter(function (Flow $flow) {
-            return $flow->is_income;
+            return $flow->isIncome();
         });
     }
 
     public function getExpensesAttribute(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->relateFlows->filter(function (Flow $flow) {
-            return !$flow->is_income;
+            return $flow->isExpense();
+        });
+    }
+
+    public function getSpendingAttribute(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->relateFlows->filter(function (Flow $flow) {
+            return $flow->isSpending();
         });
     }
 }

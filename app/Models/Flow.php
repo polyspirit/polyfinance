@@ -8,12 +8,16 @@ use Illuminate\Support\Carbon;
 use App\Models\User;
 use App\Models\Currency;
 
+use App\Enums\FlowType;
+
 class Flow extends Model
 {
     protected $guarded = ['id'];
     protected $hidden = ['created_at', 'updated_at', 'relateUser', 'relateCurrency'];
-    protected $casts = ['is_income' => 'boolean'];
     protected $appends = ['date', 'currency'];
+
+    // TODO: make in emum
+    private const TYPES = ['income', 'expense', 'spending'];
 
 
     // ** RELATIONS **
@@ -39,5 +43,23 @@ class Flow extends Model
     public function getCurrencyAttribute(): Currency|null
     {
         return $this->relateCurrency;
+    }
+
+
+    // ** TYPES **
+
+    public function isIncome()
+    {
+        return $this->type === 'income';
+    }
+
+    public function isExpense()
+    {
+        return $this->type === 'expense';
+    }
+
+    public function isSpending()
+    {
+        return $this->type === 'spending';
     }
 }

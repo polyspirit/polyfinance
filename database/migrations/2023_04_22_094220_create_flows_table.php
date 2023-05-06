@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(\App\Models\User::class);
             $table->foreignIdFor(\App\Models\Currency::class);
-            $table->boolean('is_income');
+            $table->string('type', 63)->default('income');
             $table->decimal('amount', 12);
             $table->string('item');
             $table->text('comment');
