@@ -16,7 +16,7 @@ class Controller extends BaseController
     use ApiResponser;
 
 
-    // VALIDATION AND AUTHORIZATION
+    // ** VALIDATION AND AUTHORIZATION **
 
     protected function validate(array $validationRules = []): bool
     {
@@ -33,5 +33,24 @@ class Controller extends BaseController
         }
 
         return true;
+    }
+
+
+    // ** OTHER **
+
+    protected function addUserIdToRequest(Request &$request, $userId = null)
+    {
+        if (empty($request->user_id)) {
+
+            if (is_null($userId) && !is_null(auth()->user())) {
+                $userId = auth()->user()->id;
+            }
+
+            if (!is_null($userId)) {
+                $request->merge(['user_id' => $userId]);
+            } else {
+                throw new \Exception('Unathorized', 401);
+            }
+        }
     }
 }

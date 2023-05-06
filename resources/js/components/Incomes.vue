@@ -4,31 +4,59 @@
     </div>
     <div class="card-body">
         <div class="mb-3">
-            <button class="btn btn-primary mb-4" title="Add new Income" data-bs-toggle="modal"
-                data-bs-target="#exampleModal">
+            <button class="btn btn-primary mb-4" title="Add new Income" @click="toggleModal">
                 <i class="bi bi-plus-lg"></i>
             </button>
         </div>
 
-        <div v-for="flow in flows" :key="flow.id">
-            {{ flow.id }}: {{ flow.item }}
+        <div class="mb-3" v-for="user in users" :key="user.id">
+            <h2>{{ user.name }}</h2>
+            <table class="table table-striped-columns">
+                <tr>
+                    <th>Date: </th>
+                    <th>Item: </th>
+                    <th>Amount: </th>
+                    <th>Comment: </th>
+                </tr>
+                <tr v-for="flow in user.flows" :key="flow.id">
+                    <td>{{ flow.date }}</td>
+                    <td>{{ flow.item }}</td>
+                    <td>{{ flow.amount }} {{ flow.currency.symbol }}</td>
+                    <td>{{ flow.comment }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="incomeModal" tabindex="-1" aria-labelledby="incomeModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add new Income</h1>
+                    <h1 class="modal-title fs-5" id="incomeModalLabel">Add new Income</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
 
-                    <form action="/flows" method="POST" class="mt-2" id="form-add-income">
-                        <field-text name="item"></field-text>
-                        <field-price name="amount"></field-price>
-                        <field-textarea name="comment"></field-textarea>
-                        <field-hidden name="income" value="1"></field-hidden>
+                    <form action="/flows" method="POST" class="mt-2 container" id="form-add-income">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <field-text name="item"></field-text>
+                            </div>
+                        </div>
+                        <div class="row  mb-3 align-items-end">
+                            <div class="col-8">
+                                <field-price name="amount"></field-price>
+                            </div>
+                            <div class="col-4">
+                                <field-select name="currency_id" :options="currencies"></field-select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <field-textarea name="comment"></field-textarea>
+                            </div>
+                        </div>
+                        <field-hidden name="is_income" value="1"></field-hidden>
                     </form>
 
                 </div>
@@ -42,26 +70,43 @@
 </template>
 
 <script>
+import Modal from 'bootstrap/js/dist/modal';
+import store from '@/store'
+
 export default {
     data: () => ({
-        flows: null,
-        addForm: null
+        users: null,
+        currencies: [],
+        addForm: null,
+        modal: null
     }),
     mounted() {
-        this.getFlows();
+        this.getData();
 
         this.addForm = document.getElementById('form-add-income');
+
+        this.modal = new Modal('#incomeModal');
     },
     methods: {
-        async getFlows() {
+        async getData() {
             axios
-                .get('/api/flows/')
+                .get('/api/incomes')
                 .then((response) => {
-                    this.flows = response.data.data;
+                    this.users = response.data.data.users;
+                    // console.log(this.users);
+                    for (const currency of response.data.data.currencies) {
+                        this.currencies.push({
+                            value: currency.id,
+                            title: currency.code
+                        });
+                    }
                 })
                 .catch(error => {
                     console.error(error);
                 });
+        },
+        toggleModal() {
+            this.modal.toggle();
         },
         addIncome(e) {
             e.preventDefault();
@@ -69,8 +114,14 @@ export default {
             const data = new FormData(this.addForm);
 
             axios
-                .post('/api/flows/', data)
+                .post('/api/flows', data)
                 .then(response => {
+                    this.modal.hide();
+                    for (const user of this.users) {
+                        if (user.id === store.state.auth.user.id) {
+                            user.flows.push(response.data.data);
+                        }
+                    }
                     console.log(response.data.data);
                 })
                 .catch(error => {

@@ -1,10 +1,8 @@
 <template>
-    <div class="mb-3">
-        <div class="form-control-wrapper">
-            <label v-if="type !== 'hidden'" :for="attrs.id" class="form-label">{{ attrs.title }}</label>
-            <textarea v-if="type === 'textarea'" v-bind="attrs"></textarea>
-            <input v-else v-bind="attrs">
-        </div>
+    <div class="form-control-wrapper">
+        <label v-if="type !== 'hidden'" :for="attrs.id" class="form-label">{{ attrs.title }}</label>
+        <textarea v-if="type === 'textarea'" v-bind="attrs"></textarea>
+        <input v-else v-bind="attrs">
     </div>
 </template>
 

@@ -27,4 +27,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResources([
         'flows' => FlowController::class
     ]);
+
+    Route::get('/incomes', [FlowController::class, 'getIncomes']);
+    Route::get('/expenses', [FlowController::class, 'getExpenses']);
 });

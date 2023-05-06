@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
-use App\Repositories\Interfaces\FlowRepositoryInterface;
+use App\Repositories\FlowRepository;
+use App\Repositories\CurrencyRepository;
+use App\Repositories\UserRepository;
 
 class FlowController extends Controller
 {
-    private FlowRepositoryInterface $flowRepo;
-
-    public function __construct(FlowRepositoryInterface $flowRepo)
+    public function __construct(
+        private FlowRepository $flowRepo,
+        private CurrencyRepository $currencyRepo,
+        private UserRepository $userRepo,
+    )
     {
-        $this->flowRepo = $flowRepo;
     }
 
     public function main(): \Illuminate\Contracts\View\View
@@ -25,25 +27,52 @@ class FlowController extends Controller
         );
     }
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        return $this->success($this->flowRepo->getAll());
+        $isIncome = $request->is_income ?? true;
+
+        return $this->success([
+            'users' => $this->userRepo->all(),
+            'flows' => $this->flowRepo->getWhere('is_income', $isIncome),
+            'currencies' => $this->currencyRepo->all()
+        ]);
     }
 
-    public function store(Request $request)
+    public function getIncomes(Request $request): \Illuminate\Http\JsonResponse
+    {
+        if (!isset($request->is_income) || !$request->is_income) {
+            $request->merge(['is_income' => true]);
+        }
+
+        return $this->index($request);
+    }
+
+    public function getExpenses(Request $request): \Illuminate\Http\JsonResponse
+    {
+        if (!isset($request->is_income) || $request->is_income) {
+            $request->merge(['is_income' => false]);
+        }
+
+        return $this->index($request);
+    }
+
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         if (!$this->validate(
             [
+                'currency_id' => 'required|numeric',
                 'item' => 'required|string',
                 'amount' => 'required|numeric',
-                'is_income' => 'required|numeric'
+                'is_income' => 'required|numeric',
             ]
         )) {
             return $this->error();
         }
 
+        $this->addUserIdToRequest($request);
+
         $income = $this->flowRepo->create($request->all());
 
-        return $this->success(['id' => $income->id]);
+        return $this->success($income);
     }
 }

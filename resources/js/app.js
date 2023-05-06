@@ -39,5 +39,5 @@ Object.entries(import.meta.glob('./**/*.vue', { eager: true })).forEach(([path, 
  */
 
 app.use(Router);
-app.use(store)
+app.use(store);
 app.mount('#app');

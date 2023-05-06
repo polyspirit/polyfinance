@@ -3,22 +3,22 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\Interfaces\RepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services.
-     */
     public function register(): void
     {
-        $this->app->bind(
-            \App\Repositories\Interfaces\FlowRepositoryInterface::class, \App\Repositories\FlowRepository::class
-        );
+        foreach (glob(app_path() . '/Repositories/*.php') as $filename) {
+            $slashParts = explode('/', $filename);
+            $dotParts = explode('.', $slashParts[count($slashParts) - 1]);
+            $this->app->bind(
+                RepositoryInterface::class,
+                'App\Repositories\\' . $dotParts[0]
+            );
+        }
     }
 
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
         //
