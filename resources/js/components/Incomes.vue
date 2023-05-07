@@ -9,26 +9,42 @@
             </button>
         </div>
 
+        <!-- TODO: dates need to be first, than users, than flows of date and user -->
         <div class="mb-3" v-for="user in users" :key="user.id">
             <h2>{{ user.name }}</h2>
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Date: </th>
-                        <th>Item: </th>
-                        <th>Amount: </th>
-                        <th>Comment: </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="flow in user.flows" :key="flow.id">
-                        <td>{{ flow.date }}</td>
-                        <td>{{ flow.item }}</td>
-                        <td>{{ flow.amount }} {{ flow.currency.symbol || flow.currency.code }}</td>
-                        <td>{{ flow.comment }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <ul class="nav nav-tabs mb-3" role="tablist" :id="'user-' + user.id + '-yearsTab'">
+                <button class="nav-link" v-for="(yearCollection, year) in user.incomes_dated" :key="year"
+                    :id="'user-' + user.id + '-' + year + '-tab'" data-bs-toggle="tab"
+                    :data-bs-target="'#user-' + user.id + '-' + year + '-tab-pane'" type="button" role="tab"
+                    :aria-controls="'user-' + user.id + '-' + year + '-tab-pane'" aria-selected="false">
+                    {{ year }}
+                </button>
+            </ul>
+            <div class="tab-content" :id="'user-' + user.id + '-yearsTabContent'">
+                <div class="tab-pane fade" v-for="(yearCollection, year) in user.incomes_dated" :key="year"
+                    :id="'user-' + user.id + '-' + year + '-tab-pane'" role="tabpanel"
+                    :aria-labelledby="'user-' + user.id + '-' + year + '-tab'" tabindex="0">
+                    <!-- TODO: months tabs need to be here and only than — flows table -->
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date: </th>
+                                <th>Item: </th>
+                                <th>Amount: </th>
+                                <th>Comment: </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="flow in user.flows" :key="flow.id">
+                                <td>{{ flow.date }}</td>
+                                <td>{{ flow.item }}</td>
+                                <td>{{ flow.amount }} {{ flow.currency.symbol || flow.currency.code }}</td>
+                                <td>{{ flow.comment }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -75,6 +91,7 @@
 
 <script>
 import Modal from 'bootstrap/js/dist/modal';
+import Tab from 'bootstrap/js/dist/tab';
 import store from '@/store'
 
 export default {
@@ -93,10 +110,24 @@ export default {
     },
     methods: {
         async getData() {
-            axios
+            await axios
                 .get('/api/incomes')
                 .then((response) => {
                     this.users = response.data.data.users;
+                    console.log(this.users);
+
+                    // for (const user of this.users) {
+                    //     const triggerTabList = document.querySelectorAll('#user' + user.id + '-yearsTab button')
+                    //     triggerTabList.forEach(triggerEl => {
+                    //         const tabTrigger = new bootstrap.Tab(triggerEl)
+
+                    //         triggerEl.addEventListener('click', event => {
+                    //             event.preventDefault()
+                    //             tabTrigger.show()
+                    //         })
+                    //     })
+                    // }
+
                     for (const currency of response.data.data.currencies) {
                         this.currencies.push({
                             value: currency.id,

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 use App\Models\User;
 use App\Models\Currency;
@@ -14,7 +15,7 @@ class Flow extends Model
 {
     protected $guarded = ['id'];
     protected $hidden = ['created_at', 'updated_at', 'relateUser', 'relateCurrency'];
-    protected $appends = ['date', 'currency'];
+    protected $appends = ['date', 'year', 'month', 'day', 'currency'];
 
     // TODO: make in emum
     private const TYPES = ['income', 'expense', 'spending'];
@@ -38,6 +39,26 @@ class Flow extends Model
     public function getDateAttribute(): string
     {
         return Carbon::createFromDate($this->created_at)->format('d.m.Y H:i:s');
+    }
+
+    public function getTimestampAttribute(): string
+    {
+        return Carbon::createFromDate($this->created_at)->timestamp;
+    }
+
+    public function getYearAttribute(): string
+    {
+        return Carbon::createFromDate($this->created_at)->year;
+    }
+
+    public function getMonthAttribute(): string
+    {
+        return Carbon::createFromDate($this->created_at)->month;
+    }
+
+    public function getDayAttribute(): string
+    {
+        return Carbon::createFromDate($this->created_at)->day;
     }
 
     public function getCurrencyAttribute(): Currency|null

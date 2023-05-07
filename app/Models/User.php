@@ -16,7 +16,11 @@ class User extends Authenticatable
     protected $fillable = ['name', 'email', 'password',];
     protected $hidden = ['password', 'remember_token', 'relateFlows'];
     protected $casts = ['email_verified_at' => 'datetime'];
-    protected $appends = ['flows', 'incomes', 'expenses'];
+    protected $appends = [
+        'flows',
+        'incomes', 'expenses', 'spendings',
+        'incomes_dated', 'expenses_dated', 'spendings_dated',
+    ];
 
 
     // ** RELATIONS **
@@ -31,7 +35,7 @@ class User extends Authenticatable
 
     public function getFlowsAttribute(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->relateFlows;
+        return $this->relateFlows->sortBy('timestamp')->values();
     }
 
     public function getIncomesAttribute(): \Illuminate\Database\Eloquent\Collection
@@ -48,10 +52,25 @@ class User extends Authenticatable
         });
     }
 
-    public function getSpendingAttribute(): \Illuminate\Database\Eloquent\Collection
+    public function getSpendingsAttribute(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->relateFlows->filter(function (Flow $flow) {
             return $flow->isSpending();
         });
+    }
+
+    public function getIncomesDatedAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->getIncomesAttribute()->groupBy(['year', 'month']);
+    }
+
+    public function getExpensesDatedAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->getExpensesAttribute()->groupBy(['year', 'month']);
+    }
+
+    public function getSpendingsDatedAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->getExpensesAttribute()->groupBy(['year', 'month']);
     }
 }
