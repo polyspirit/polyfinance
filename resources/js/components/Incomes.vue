@@ -9,41 +9,59 @@
             </button>
         </div>
 
-        <!-- TODO: dates need to be first, than users, than flows of date and user -->
-        <div class="mb-3" v-for="user in users" :key="user.id">
-            <h2>{{ user.name }}</h2>
-            <ul class="nav nav-tabs mb-3" role="tablist" :id="'user-' + user.id + '-yearsTab'">
-                <button class="nav-link" v-for="(yearCollection, year) in user.incomes_dated" :key="year"
-                    :id="'user-' + user.id + '-' + year + '-tab'" data-bs-toggle="tab"
-                    :data-bs-target="'#user-' + user.id + '-' + year + '-tab-pane'" type="button" role="tab"
-                    :aria-controls="'user-' + user.id + '-' + year + '-tab-pane'" aria-selected="false">
-                    {{ year }}
-                </button>
-            </ul>
-            <div class="tab-content" :id="'user-' + user.id + '-yearsTabContent'">
-                <div class="tab-pane fade" v-for="(yearCollection, year) in user.incomes_dated" :key="year"
-                    :id="'user-' + user.id + '-' + year + '-tab-pane'" role="tabpanel"
-                    :aria-labelledby="'user-' + user.id + '-' + year + '-tab'" tabindex="0">
-                    <!-- TODO: months tabs need to be here and only than — flows table -->
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Date: </th>
-                                <th>Item: </th>
-                                <th>Amount: </th>
-                                <th>Comment: </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="flow in user.flows" :key="flow.id">
-                                <td>{{ flow.date }}</td>
-                                <td>{{ flow.item }}</td>
-                                <td>{{ flow.amount }} {{ flow.currency.symbol || flow.currency.code }}</td>
-                                <td>{{ flow.comment }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <ul class="nav nav-tabs mb-3" role="tablist" id="yearsTab">
+            <button v-for="(yearCollection, year) in dates" :key="year"
+                :class="isLast(year, dates) ? 'nav-link active' : 'nav-link'" :id="'year-' + year + '-tab'"
+                data-bs-toggle="tab" :data-bs-target="'#year-' + year + '-tab-pane'" type="button" role="tab"
+                :aria-controls="'year-' + year + '-tab-pane'" aria-selected="false">
+                {{ year }}
+            </button>
+        </ul>
+        <div class="tab-content" id="yearsTabContent">
+            <div v-for="(yearCollection, year) in  dates " :key="year"
+                :class="isLast(year, dates) ? 'tab-pane fade active show' : 'tab-pane fade'"
+                :id="'year-' + year + '-tab-pane'" role="tabpanel" :aria-labelledby="'year-' + year + '-tab'" tabindex="0">
+
+                <ul class="nav nav-tabs mb-3" role="tablist" :id="'year-' + year + '-Tab'">
+                    <button v-for="(monthCollection, month) in yearCollection" :key="month"
+                        :class="isLast(month, yearCollection) ? 'nav-link active' : 'nav-link'"
+                        :id="'month-' + year + '-' + month + '-tab'" data-bs-toggle="tab"
+                        :data-bs-target="'#month-' + year + '-' + month + '-tab-pane'" type="button" role="tab"
+                        :aria-controls="'month-' + year + '-' + month + '-tab-pane'" aria-selected="false">
+                        {{ month }}
+                    </button>
+                </ul>
+                <div class="tab-content" :id="'year-' + year + '-TabContent'">
+                    <div v-for="(monthCollection, month) in  yearCollection" :key="month"
+                        :class="isLast(month, yearCollection) ? 'tab-pane fade active show' : 'tab-pane fade'"
+                        :id="'month-' + year + '-' + month + '-tab-pane'" role="tabpanel"
+                        :aria-labelledby="'month-' + year + '-' + month + '-tab'" tabindex="0">
+
+                        <div class="mt-2" v-for="(userInfo, userId) in  monthCollection.users" :key="userId">
+                            <h2>{{ userInfo.name }}</h2>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date: </th>
+                                        <th>Item: </th>
+                                        <th>Amount: </th>
+                                        <th>Comment: </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="flow in userInfo.flows" :key="flow.id">
+                                        <td>{{ flow.date.split(' ')[0] }}</td>
+                                        <td>{{ flow.item }}</td>
+                                        <td>{{ flow.amount }} {{ flow.currency.symbol || flow.currency.code }}</td>
+                                        <td>{{ flow.comment }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -60,6 +78,16 @@
                     <form action="/flows" method="POST" class="mt-2 container" id="form-add-income">
                         <div class="row mb-3">
                             <div class="col">
+                                <field-date name="created_at" title="Date"></field-date>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <field-select name="user_id" title="User" :options="users"></field-select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
                                 <field-text name="item"></field-text>
                             </div>
                         </div>
@@ -68,7 +96,8 @@
                                 <field-price name="amount"></field-price>
                             </div>
                             <div class="col-4">
-                                <field-select name="currency_id" :options="currencies"></field-select>
+                                <field-select name="currency_id" title="Currency" :options="currencies"
+                                    :value="defaultCurrencyId"></field-select>
                             </div>
                         </div>
                         <div class="row">
@@ -95,43 +124,46 @@ import Tab from 'bootstrap/js/dist/tab';
 import store from '@/store'
 
 export default {
+    props: ['key', 'rerender'],
     data: () => ({
-        users: null,
+        dates: null,
+        users: [],
         currencies: [],
+        defaultCurrencyId: null,
         addForm: null,
         modal: null
     }),
     mounted() {
+        const _this = this;
+
         this.getData();
 
         this.addForm = document.getElementById('form-add-income');
 
         this.modal = new Modal('#incomeModal');
+        document.getElementById('incomeModal').addEventListener('hidden.bs.modal', event => {
+            _this.rerender();
+        });
     },
     methods: {
         async getData() {
             await axios
                 .get('/api/incomes')
                 .then((response) => {
-                    this.users = response.data.data.users;
-                    console.log(this.users);
+                    const data = response.data.data;
+                    this.dates = data.dates;
+                    this.defaultCurrencyId = data.defaultCurrencyId;
 
-                    // for (const user of this.users) {
-                    //     const triggerTabList = document.querySelectorAll('#user' + user.id + '-yearsTab button')
-                    //     triggerTabList.forEach(triggerEl => {
-                    //         const tabTrigger = new bootstrap.Tab(triggerEl)
-
-                    //         triggerEl.addEventListener('click', event => {
-                    //             event.preventDefault()
-                    //             tabTrigger.show()
-                    //         })
-                    //     })
-                    // }
-
-                    for (const currency of response.data.data.currencies) {
+                    for (const currency of data.currencies) {
                         this.currencies.push({
                             value: currency.id,
                             title: currency.code
+                        });
+                    }
+                    for (const dataUser of data.users) {
+                        this.users.push({
+                            value: dataUser.id,
+                            title: dataUser.name
                         });
                     }
                 })
@@ -151,16 +183,16 @@ export default {
                 .post('/api/flows', data)
                 .then(response => {
                     this.modal.hide();
-                    for (const user of this.users) {
-                        if (user.id === store.state.auth.user.id) {
-                            user.flows.push(response.data.data);
-                        }
-                    }
                     console.log(response.data.data);
                 })
                 .catch(error => {
                     console.error(error);
                 });
+        },
+        isLast(key, obj) {
+            const lastKeyIndex = Object.keys(obj).length - 1;
+
+            return Object.keys(obj)[lastKeyIndex] === key;
         }
     },
 };

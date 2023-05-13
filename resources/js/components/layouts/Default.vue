@@ -37,7 +37,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card shadow-sm">
-                            <router-view></router-view>
+                            <router-view :key="componentKey" :rerender="forceRerender"></router-view>
                         </div>
                     </div>
                 </div>
@@ -53,6 +53,7 @@ export default {
     data() {
         return {
             user: this.$store.state.auth.user,
+            componentKey: 0
         };
     },
     methods: {
@@ -65,6 +66,9 @@ export default {
                 this.$router.push({ name: "login" });
             });
         },
+        forceRerender() {
+            this.componentKey += 1;
+        }
     },
 };
 </script>
