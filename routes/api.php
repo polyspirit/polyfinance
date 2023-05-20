@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use \App\Http\Controllers\FlowController;
+use \App\Http\Controllers\TagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,8 @@ Route::get('/user', function (Request $request) {
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResources([
-        'flows' => FlowController::class
+        'flows' => FlowController::class,
+        'tags' => TagController::class
     ]);
 
     Route::get('/incomes', [FlowController::class, 'getIncomes']);

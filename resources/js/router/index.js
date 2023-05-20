@@ -13,37 +13,38 @@ const DahboardLayout = () => import('@/components/layouts/Default.vue')
 /* Authenticated Component */
 const Dashboard = () => import('@/components/Dashboard.vue')
 const Incomes = () => import('@/components/Incomes.vue')
+const Tags = () => import('@/components/Tags.vue')
 /* Authenticated Component */
 
 
 const routes = [
     {
-        name: "login",
-        path: "/login",
+        name: 'login',
+        path: '/login',
         component: Login,
         meta: {
-            middleware: "guest",
+            middleware: 'guest',
             title: `Login`
         }
     },
     {
-        name: "register",
-        path: "/register",
+        name: 'register',
+        path: '/register',
         component: Register,
         meta: {
-            middleware: "guest",
+            middleware: 'guest',
             title: `Register`
         }
     },
     {
-        path: "/",
+        path: '/',
         component: DahboardLayout,
         meta: {
-            middleware: "auth"
+            middleware: 'auth'
         },
         children: [
             {
-                name: "dashboard",
+                name: 'dashboard',
                 path: '/',
                 component: Dashboard,
                 meta: {
@@ -51,12 +52,21 @@ const routes = [
                 }
             },
             {
-                name: "incomes",
-                path: "/incomes",
+                name: 'incomes',
+                path: '/incomes',
                 component: Incomes,
                 meta: {
-                    middleware: "auth",
+                    middleware: 'auth',
                     title: `Incomes`
+                }
+            },
+            {
+                name: 'tags',
+                path: '/tags',
+                component: Tags,
+                meta: {
+                    middleware: 'auth',
+                    title: `Tags`
                 }
             },
         ]
@@ -70,16 +80,16 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title
-    if (to.meta.middleware == "guest") {
+    if (to.meta.middleware == 'guest') {
         if (store.state.auth.authenticated) {
-            next({ name: "dashboard" })
+            next({ name: 'dashboard' })
         }
         next()
     } else {
         if (store.state.auth.authenticated) {
             next()
         } else {
-            next({ name: "login" })
+            next({ name: 'login' })
         }
     }
 })

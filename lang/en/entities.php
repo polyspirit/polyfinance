@@ -6,5 +6,6 @@ return [
     'income' => 'income',
     'incomes' => 'incomes',
     'expense' => 'expense',
-    'expenses' => 'expenses'
+    'expenses' => 'expenses',
+    'tags' => 'tags'
 ];

@@ -6,5 +6,6 @@ return [
     'income' => 'доход',
     'incomes' => 'доходы',
     'expense' => 'расход',
-    'expenses' => 'расходы'
+    'expenses' => 'расходы',
+    'tags' => 'теги'
 ];

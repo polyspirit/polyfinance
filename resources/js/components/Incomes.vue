@@ -89,25 +89,26 @@
 
                     <form action="/flows" method="POST" class="mt-2 container" id="form-add-income">
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-6">
                                 <field-date name="created_at" title="Date"></field-date>
                             </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-6">
                                 <field-select name="user_id" title="User" :options="users"></field-select>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-6">
                                 <field-text name="item"></field-text>
+                            </div>
+                            <div class="col-6">
+                                <field-select name="tag_id" title="Tag" :options="tags"></field-select>
                             </div>
                         </div>
                         <div class="row  mb-3 align-items-end">
-                            <div class="col-8">
+                            <div class="col-6">
                                 <field-price name="amount"></field-price>
                             </div>
-                            <div class="col-4">
+                            <div class="col-6">
                                 <field-select name="currency_id" title="Currency" :options="currencies"
                                     :value="defaultCurrencyId"></field-select>
                             </div>
@@ -142,6 +143,7 @@ export default {
         dates: null,
         users: [],
         currencies: [],
+        tags: [],
         defaultCurrencyId: null,
         addForm: null,
         modal: null
@@ -173,7 +175,7 @@ export default {
                     for (const currency of data.currencies) {
                         this.currencies.push({
                             value: currency.id,
-                            title: currency.code
+                            title: currency.code + ' - ' + currency.symbol
                         });
                     }
                     for (const dataUser of data.users) {
@@ -182,6 +184,13 @@ export default {
                             title: dataUser.name
                         });
                     }
+                    for (const tag of data.tags) {
+                        this.tags.push({
+                            value: tag.id,
+                            title: tag.name
+                        });
+                    }
+                    console.log(this.tags);
                 })
                 .catch(error => {
                     console.error(error);
@@ -220,8 +229,6 @@ export default {
                         const user = monthData.users[userId];
                         user.total = {};
                         for (const flow of user.flows) {
-
-                            console.log(user.total[flow.currency.code]);
                             if (user.total[flow.currency.code]) {
                                 user.total[flow.currency.code].summ += flow.amount;
                             } else {
@@ -231,8 +238,6 @@ export default {
                     }
                 }
             }
-
-            console.log(this.dates);
         }
     },
 };

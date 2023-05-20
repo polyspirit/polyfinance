@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\FlowRepository;
 use App\Repositories\CurrencyRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\TagRepository;
 use App\Classes\Dates;
 
 class FlowController extends Controller
@@ -14,6 +15,7 @@ class FlowController extends Controller
         private FlowRepository $flowRepo,
         private CurrencyRepository $currencyRepo,
         private UserRepository $userRepo,
+        private TagRepository $tagRepo,
         private Dates $datesClass,
     )
     {
@@ -34,8 +36,8 @@ class FlowController extends Controller
         return $this->success([
             'users' => $this->userRepo->all(),
             'dates' => $this->datesClass->getDatedFlows($request->type),
-            'flows' => $this->flowRepo->getWhere('type', $request->type),
             'currencies' => $this->currencyRepo->all(),
+            'tags' => $this->tagRepo->all(),
             'defaultCurrencyId' => $this->currencyRepo->getDefaultCurrency()->id
         ]);
     }

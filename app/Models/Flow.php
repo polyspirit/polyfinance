@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 use App\Models\User;
 use App\Models\Currency;
-
-use App\Enums\FlowType;
+use App\Models\Tag;
 
 class Flow extends Model
 {
@@ -32,6 +32,11 @@ class Flow extends Model
     public function relateCurrency()
     {
         return $this->belongsTo(Currency::class, 'currency_id', 'id');
+    }
+
+    public function relateTags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
     }
 
 

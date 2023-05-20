@@ -13,6 +13,9 @@
                             <router-link :to="{ name: 'dashboard' }" class="nav-link">Home</router-link>
                         </li>
                         <li class="nav-item">
+                            <router-link :to="{ name: 'tags' }" class="nav-link">Tags</router-link>
+                        </li>
+                        <li class="nav-item">
                             <router-link :to="{ name: 'incomes' }" class="nav-link">Incomes</router-link>
                         </li>
                     </ul>
