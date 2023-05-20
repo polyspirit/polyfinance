@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('type', 63)->default('income');
             $table->decimal('amount', 12);
             $table->string('item');
-            $table->text('comment');
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

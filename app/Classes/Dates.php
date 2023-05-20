@@ -4,6 +4,7 @@ namespace App\Classes;
 
 use App\Repositories\FlowRepository;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class Dates
 {
@@ -32,6 +33,7 @@ class Dates
                 }
 
                 $dates->put('users', $userInfo);
+                $dates->put('month', Carbon::createFromDate($year, $month, '01')->format('F'));
             }
         }
 

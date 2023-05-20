@@ -16,6 +16,7 @@ class Flow extends Model
     protected $guarded = ['id'];
     protected $hidden = ['created_at', 'updated_at', 'relateUser', 'relateCurrency'];
     protected $appends = ['date', 'year', 'month', 'day', 'currency'];
+    protected $casts = ['amount' => 'float'];
 
     // TODO: make in emum
     private const TYPES = ['income', 'expense', 'spending'];

@@ -28,7 +28,7 @@
                         :id="'month-' + year + '-' + month + '-tab'" data-bs-toggle="tab"
                         :data-bs-target="'#month-' + year + '-' + month + '-tab-pane'" type="button" role="tab"
                         :aria-controls="'month-' + year + '-' + month + '-tab-pane'" aria-selected="false">
-                        {{ month }}
+                        {{ monthCollection.month }}
                     </button>
                 </ul>
                 <div class="tab-content" :id="'year-' + year + '-TabContent'">
@@ -56,6 +56,18 @@
                                         <td>{{ flow.comment }}</td>
                                     </tr>
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td>Total:</td>
+                                        <td>
+                                            <div v-for="(total, code) in userInfo.total" :key="code">
+                                                {{ total.summ + ' ' + total.currency.symbol }}
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
 
@@ -122,6 +134,7 @@
 import Modal from 'bootstrap/js/dist/modal';
 import Tab from 'bootstrap/js/dist/tab';
 import store from '@/store'
+import { toRaw } from 'vue';
 
 export default {
     props: ['key', 'rerender'],
@@ -154,6 +167,9 @@ export default {
                     this.dates = data.dates;
                     this.defaultCurrencyId = data.defaultCurrencyId;
 
+                    this.setupSumms();
+
+                    // make data for selects
                     for (const currency of data.currencies) {
                         this.currencies.push({
                             value: currency.id,
@@ -193,6 +209,30 @@ export default {
             const lastKeyIndex = Object.keys(obj).length - 1;
 
             return Object.keys(obj)[lastKeyIndex] === key;
+        },
+        setupSumms() {
+            for (const year in this.dates) {
+                const months = this.dates[year];
+                for (const month in months) {
+                    const monthData = months[month];
+                    for (const userId in monthData.users) {
+
+                        const user = monthData.users[userId];
+                        user.total = {};
+                        for (const flow of user.flows) {
+
+                            console.log(user.total[flow.currency.code]);
+                            if (user.total[flow.currency.code]) {
+                                user.total[flow.currency.code].summ += flow.amount;
+                            } else {
+                                user.total[flow.currency.code] = {summ: flow.amount, currency: flow.currency};
+                            }
+                        }
+                    }
+                }
+            }
+
+            console.log(this.dates);
         }
     },
 };
