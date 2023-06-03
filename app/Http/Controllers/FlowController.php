@@ -17,8 +17,7 @@ class FlowController extends Controller
         private UserRepository $userRepo,
         private TagRepository $tagRepo,
         private Dates $datesClass,
-    )
-    {
+    ) {
     }
 
     public function main(): \Illuminate\Contracts\View\View
@@ -81,5 +80,16 @@ class FlowController extends Controller
         $income = $this->flowRepo->create($request->all());
 
         return $this->success($income);
+    }
+
+    public function destroy(Request $request, int|string $id): \Illuminate\Http\JsonResponse
+    {
+        $result = $this->flowRepo->delete((int) $id);
+
+        if ($result) {
+            return $this->success(['message' => 'Flow ' . $id . ' deleted']);
+        } else {
+            return $this->error('Flow ' . $id . ' didn\'t deleted');
+        }
     }
 }

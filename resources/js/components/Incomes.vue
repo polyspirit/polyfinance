@@ -4,7 +4,7 @@
     </div>
     <div class="card-body">
         <div class="mb-3">
-            <button class="btn btn-primary mb-4" title="Add new Income" @click="toggleModal">
+            <button class="btn btn-primary mb-4 js-add-flow" id="" @click="toggleModal">
                 <i class="bi bi-plus-lg"></i>
             </button>
         </div>
@@ -42,18 +42,29 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Date: </th>
-                                        <th>Item: </th>
-                                        <th>Amount: </th>
-                                        <th>Comment: </th>
+                                        <th>Date</th>
+                                        <th>Item</th>
+                                        <th>Amount</th>
+                                        <th>Comment</th>
+                                        <th style="width: 110px; text-align: right;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="flow in userInfo.flows" :key="flow.id">
+                                    <tr v-for="flow in userInfo.flows" :key="flow.id" :id="'flow-' + flow.id">
                                         <td>{{ flow.date.split(' ')[0] }}</td>
                                         <td>{{ flow.item }}</td>
                                         <td>{{ flow.amount }} {{ flow.currency.symbol || flow.currency.code }}</td>
                                         <td>{{ flow.comment }}</td>
+                                        <td class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-primary btn-sm me-2 js-update-flow"
+                                                :data-id="flow.id" @click="toggleModal">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" :data-id="flow.id"
+                                                @click="deleteFlow">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
@@ -78,75 +89,28 @@
         </div>
     </div>
 
-    <div class="modal fade" id="incomeModal" tabindex="-1" aria-labelledby="incomeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="incomeModalLabel">Add new Income</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-
-                    <form action="/flows" method="POST" class="mt-2 container" id="form-add-income">
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <field-date name="created_at" title="Date"></field-date>
-                            </div>
-                            <div class="col-6">
-                                <field-select name="user_id" title="User" :options="users"></field-select>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <field-text name="item"></field-text>
-                            </div>
-                            <div class="col-6">
-                                <field-select name="tag_id" title="Tag" :options="tags"></field-select>
-                            </div>
-                        </div>
-                        <div class="row  mb-3 align-items-end">
-                            <div class="col-6">
-                                <field-price name="amount"></field-price>
-                            </div>
-                            <div class="col-6">
-                                <field-select name="currency_id" title="Currency" :options="currencies"
-                                    :value="defaultCurrencyId"></field-select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <field-textarea name="comment"></field-textarea>
-                            </div>
-                        </div>
-                        <field-hidden name="type" value="income"></field-hidden>
-                    </form>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" @click="addIncome">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <flow-modal :title="modalTitle" :options="options" :currencyId="currencyId" :flowId="flowId"
+        @add-event="addflow"></flow-modal>
 </template>
 
 <script>
 import Modal from 'bootstrap/js/dist/modal';
-import Tab from 'bootstrap/js/dist/tab';
 import store from '@/store'
-import { toRaw } from 'vue';
 
 export default {
     props: ['key', 'rerender'],
     data: () => ({
         dates: null,
-        users: [],
-        currencies: [],
-        tags: [],
-        defaultCurrencyId: null,
+        options: {
+            users: [],
+            currencies: [],
+            tags: []
+        },
+        currencyId: null,
+        flowId: null,
         addForm: null,
-        modal: null
+        modal: null,
+        modalTitle: 'Add new Flow'
     }),
     mounted() {
         const _this = this;
@@ -155,8 +119,8 @@ export default {
 
         this.addForm = document.getElementById('form-add-income');
 
-        this.modal = new Modal('#incomeModal');
-        document.getElementById('incomeModal').addEventListener('hidden.bs.modal', event => {
+        this.modal = new Modal('#flowModal');
+        document.getElementById('flowModal').addEventListener('hidden.bs.modal', event => {
             _this.rerender();
         });
     },
@@ -167,39 +131,47 @@ export default {
                 .then((response) => {
                     const data = response.data.data;
                     this.dates = data.dates;
-                    this.defaultCurrencyId = data.defaultCurrencyId;
+                    this.currencyId = data.defaultCurrencyId;
 
                     this.setupSumms();
 
                     // make data for selects
                     for (const currency of data.currencies) {
-                        this.currencies.push({
+                        this.options.currencies.push({
                             value: currency.id,
                             title: currency.code + ' - ' + currency.symbol
                         });
                     }
                     for (const dataUser of data.users) {
-                        this.users.push({
+                        this.options.users.push({
                             value: dataUser.id,
                             title: dataUser.name
                         });
                     }
                     for (const tag of data.tags) {
-                        this.tags.push({
+                        this.options.tags.push({
                             value: tag.id,
                             title: tag.name
                         });
                     }
-                    console.log(this.tags);
                 })
                 .catch(error => {
                     console.error(error);
                 });
         },
-        toggleModal() {
+        toggleModal(e) {
+            const button = this.getButton(e.target);
+            if (button.classList.contains('js-add-flow')) {
+                this.modalTitle = 'Add new Flow';
+            } else if (button.classList.contains('js-update-flow')) {
+                // TODO: push flowId to fields id attribute
+                this.flowId = button.dataset.id;
+                this.modalTitle = 'Update Flow';
+            }
             this.modal.toggle();
         },
-        addIncome(e) {
+
+        addflow(e) {
             e.preventDefault();
 
             const data = new FormData(this.addForm);
@@ -213,6 +185,32 @@ export default {
                 .catch(error => {
                     console.error(error);
                 });
+        },
+        deleteFlow(e) {
+            e.preventDefault();
+
+            const button = this.getButton(e.target);
+            const flowId = button.dataset.id;
+
+            if (flowId != undefined) {
+                axios
+                    .delete('/api/flows/' + flowId)
+                    .then(response => {
+                        document.getElementById('flow-' + flowId).remove();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }
+        },
+
+        getButton(target) {
+            let button = target;
+            if (button.tagName.toUpperCase() !== 'BUTTON') {
+                button = button.closest('button');
+            }
+
+            return button;
         },
         isLast(key, obj) {
             const lastKeyIndex = Object.keys(obj).length - 1;
@@ -232,7 +230,7 @@ export default {
                             if (user.total[flow.currency.code]) {
                                 user.total[flow.currency.code].summ += flow.amount;
                             } else {
-                                user.total[flow.currency.code] = {summ: flow.amount, currency: flow.currency};
+                                user.total[flow.currency.code] = { summ: flow.amount, currency: flow.currency };
                             }
                         }
                     }

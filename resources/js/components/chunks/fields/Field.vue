@@ -8,7 +8,7 @@
 
 <script>
 export default {
-    props: ['name', 'title', 'type', 'value', 'customAttrs'],
+    props: ['name', 'title', 'type', 'value', 'itemId', 'customAttrs'],
     data: () => ({
         attrs: {
             class: 'form-control'
@@ -20,9 +20,14 @@ export default {
         }
         this.attrs.name = this.name;
         this.attrs.value = this.value || '';
-        this.attrs.id = this.type + '-' + this.name;
         this.attrs.title = this.title || this.name.charAt(0).toUpperCase() + this.name.slice(1);
         this.attrs.placeholder = this.attrs.title;
+        this.attrs.id = this.type + '-' + this.name;
+
+        console.log(this.itemId);
+        if (this.itemId) {
+            this.attrs.id += '-' + this.itemId;
+        }
 
         for (const key in this.customAttrs) {
             this.attrs[key] = this.customAttrs[key];
